@@ -1,0 +1,8 @@
+---
+
+- name: "Stop RSTUDIO Servce"
+  become: "yes"
+  systemd: 
+    state: "stopped"
+    name: "rstudio-server"
+

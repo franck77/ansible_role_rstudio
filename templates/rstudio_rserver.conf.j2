@@ -1,0 +1,34 @@
+# Server Configuration File
+#
+# # Interface d'admin
+admin-enabled=1
+admin-group={{ rstudio_admin }},{{ rstudio_power }}
+admin-superuser-group={{ rstudio_admin }},{{ rstudio_power }}
+#
+# # RStudio Server Port
+www-port={{rstudio_port}}
+#
+# # Moteur R
+rsession-which-r=/bin/R
+#
+# #Groupe qui peuvent avoir acces a RStudio Server Pro
+auth-required-user-group=grstudio_{{entity_name}},{{ rstudio_admin }},{{ rstudio_power }}
+#
+# # Rstudio session
+auth-pam-sessions-enabled=1
+#
+# #SSL
+ssl-enabled=1
+ssl-certificate={{ certificate }}
+ssl-certificate-key={{ certificate_key_rstudio }}
+ssl-protocols=TLSv1 TLSv1.1 TLSv1.2
+#
+# #Interface de check
+server-health-check-enabled=1
+#
+# #Accepter les multi sessions
+server-multiple-sessions=1
+#
+# #LOG
+#
+server-access-log=1

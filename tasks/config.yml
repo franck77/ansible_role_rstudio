@@ -1,0 +1,192 @@
+---
+
+- name:  Check that input variables are well transmited to config shiny
+  assert: { that: "{{ item }} is defined" }
+  with_items:
+    - ldap_conf_file
+    - rstudio_pam_file
+    - rstudio_rserver_file
+    - rstudio_sudo
+    - rstudio_scripts
+    - rstudio_user
+    - rstudio_scripts_bin
+    - rstudio_scripts_cfg
+    - rstudio_scripts_log
+    - rstudio_mail_alerte_file
+    - certificate
+    - certificate_key_rstudio
+    - config_watchdog_mail_alerte
+    - watchdog_script_name
+    - rstudio_port
+    - watchdog_log_name
+    - watchdog_script_error
+    - rstudio_path_conf
+
+- name:  Check that input variables are well transmited to config shiny
+  assert: { that: "{{ item }} is defined" }
+  with_items:
+    - rstudio_load_balancer_file
+    - rstudio_secure_cookie
+  tags:
+    - HA
+
+- name: "Configure pam rstudio for LDAP"
+  become: "true"
+  template:
+    src: "templates/rstudio_rstudio_pam.j2"
+    dest: "{{ rstudio_pam_file }}"
+
+- name: "Configure rserver.conf"
+  become: "true"
+  template:
+    src: "templates/rstudio_rserver.conf.j2"
+    dest: "{{ rstudio_rserver_file }}"
+
+- name: "Configure HA for Rstudio"
+  become: "true"
+  template:
+    src: "templates/rstudio_loadbalancer.j2"
+    dest: "{{ rstudio_load_balancer_file }}"
+    owner: "root"
+    group: "rstudio-server"
+    mode: "0755"
+  tags:
+    - HA
+
+- name: "Create secure cookie configuration file"
+  become: "true"
+  template:
+    src: "templates/rstudio_secure-cookie-key.j2"
+    dest: "{{ rstudio_secure_cookie }}"
+    owner: "root"
+    group: "rstudio-server"
+    mode: "0600"
+  tags:
+    - HA
+
+### SUDOERS
+- name: "Deploy sudo for Rstudio"
+  become: true
+  include_role:
+    name: socle_sudo
+  vars:
+    sudo_state: "install"
+
+- name: Deploy the rules
+  become: true
+  include_role:
+    name: socle_sudo
+    tasks_from: deploy_rules.yml
+  vars:
+    socle_sudo_config: "{{ rstudio_sudo }}"
+
+
+### Exploitation scripts
+- name: "Ensure scripts directory for Rstudio is created"
+  become: "true"
+  file:
+        path: "{{ rstudio_scripts }}"
+        state: "directory"
+        mode: "0700"
+        owner: "{{ rstudio_user }}"
+        group: "{{ rstudio_user }}"
+
+- name: "Ensure bin directory for Rstudio is created"
+  become: "true"
+  file:
+        path: "{{ rstudio_scripts_bin }}"
+        state: "directory"
+        mode: "0755"
+        owner: "{{ rstudio_user }}"
+        group: "{{ rstudio_user }}"
+
+- name: "Ensure cfg directory for Rstudio is created"
+  become: "true"
+  file:
+        path: "{{ rstudio_scripts_cfg }}"
+        state: "directory"
+        mode: "0755"
+        owner: "{{ rstudio_user }}"
+        group: "{{ rstudio_user }}"
+
+- name: "Ensure log directory for Rstudio is created"
+  become: "true"
+  file:
+        path: "{{ rstudio_scripts_log }}"
+        state: "directory"
+        mode: "0755"
+        owner: "{{ rstudio_user }}"
+        group: "{{ rstudio_user }}"
+
+- name: "Create exploitation script for Rstudio"
+  become: "true"
+  template:
+        src: "templates/rstudio_script_exploitation.j2"
+        dest: "{{ rstudio_scripts_bin }}/rstudio.ksh"
+        owner: "{{ rstudio_user }}"
+        group: "{{ rstudio_user }}"
+        mode: "0750"
+
+- name: "Copy watchdog script for rstudio"
+  become: "true"
+  template:
+    src: "templates/ds_appliance_watchdog.sh.j2"
+    dest: "{{ rstudio_scripts_bin }}/{{ watchdog_script_name }}"
+    owner: "{{ rstudio_user }}"
+    group: "{{ rstudio_user }}"
+    mode: "0750"
+
+- name: "Copy config mail alerte for rstudio"
+  become: "true"
+  #become_user: "{{ rstudio_user }}"
+  copy:
+    src: "files/{{ rstudio_mail_alerte_file }}"
+    dest: "{{ config_watchdog_mail_alerte }}"
+    owner: "{{ rstudio_user }}"
+    group: "{{ rstudio_user }}"
+    mode: "0750"
+
+- name: "Create crontab to restart rstudio if needed"
+  become: "true"
+  cron:
+    name: "Restart auto rstudio"
+    user: "{{ rstudio_user }}"
+    job: "{{ rstudio_scripts_bin }}/{{ watchdog_script_name }} $(hostname -f) {{ rstudio_port }} rstudio 1>{{ watchdog_log_name }} 2>{{ watchdog_script_error }}"
+
+- name: "Tunning R sessions"
+  become: "true"
+  template:
+        src: "templates/rstudio_profiles.j2"
+        dest: "{{ rstudio_path_conf }}/profiles"
+
+#- name: "Restart rstudio"
+#  become: "true"
+#  service:
+#        name: "rstudio-server"
+#        state: "restarted"
+
+#- name: "SSH group exist in sshd file"
+#  become: "true"
+#  lineinfile: 
+#    dest: "/etc/ssh/sshd_config"
+#    regexp: "allowgroups .*gssh_{{entity_name}}"
+#    line: "gssh_{{entity_name}}"
+#  check_mode: "yes"
+#  register: presence
+#  failed_when: presence.changed
+
+#- name: "Config SSH access for data scientiste"
+#  become: "true"
+#  replace:
+#    path: "/etc/ssh/sshd_config"
+#    regexp: "allowgroups"
+#    replace: "allowgroups gssh_{{entity_name}}"
+#    backup: "yes"
+#  when: presence.changed
+
+#- name: "Restart sshd"
+#  become: "true"
+#  systemd:
+#    name: "sshd.service"
+#    state: "restarted"
+

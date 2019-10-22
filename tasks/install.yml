@@ -1,0 +1,43 @@
+---
+
+- name: "Check that input variables are well transmitted to launch the role I2T_SOCLE_RSTUDIO"
+  assert:
+    that: "{{ item }} is defined"
+  with_items:
+    - rstudio_applis_path
+    - server_repo_url
+    - rstudio_repo_name
+    - server_mirror_repo_url
+    - rstudio_rpm
+
+- name: "Create User Rstudio with the good UID"
+  become: "true"
+  user:
+    name: "rstudio-server"
+    shell: "/bin/bash"
+    uid: "4002"
+    comment: "User RStudio"
+    home: "{{ rstudio_applis_path }}"
+
+- name: "Add repository rstudio"
+  become: "true"
+  yum_repository:
+    name: "rstudio"
+    description: "Rstudio repo"
+    baseurl: "{{ server_repo_url }}/{{ rstudio_repo_name }}"
+    mirrorlist: "{{ server_mirror_repo_url }}/{{ rstudio_repo_name }}"
+    gpgcheck: "no"
+    enabled: "yes"
+
+- name: "Install rstudio"
+  become: "true"
+  yum:
+    name: "{{ rstudio_rpm }}"
+    state: "installed"
+
+- name: "Check packages requirements for LDAP"
+  become: "true"
+  yum:
+    name: "nss-pam-ldapd"
+    state: "installed"
+

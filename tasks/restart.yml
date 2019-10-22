@@ -1,0 +1,8 @@
+---
+
+- name: "Restart RSTUDIO Servce"
+  become: "yes"
+  systemd: 
+    state: "restarted"
+    name: "rstudio-server"
+

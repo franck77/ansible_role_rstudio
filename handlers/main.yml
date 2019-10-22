@@ -1,0 +1,25 @@
+---
+- name: Restart rstudio
+  service: name=rstudio-server state=restarted
+
+- name: "Stop rstudio"
+  service:
+    name: "rstudio-server"
+    state: "stopped"
+
+- name: Enable httpd
+  systemd:
+    name: httpd
+    enabled: yes
+    masked: no
+
+- name: Restart httpd
+  systemd:
+    name: httpd
+    state: restarted
+
+- name: "Restart sshd"
+  systemd: 
+    name: "sshd.service"
+    state: "restarted"
+

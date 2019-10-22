@@ -1,0 +1,51 @@
+---
+
+- name: Check requested variables for java create
+  assert: { that: "{{ item }} is defined" }
+  with_items:
+     - rstudio_repo_name
+     - rstudio_rpm
+     - rstudio_path_conf
+     - role_create_fs_list
+
+- name: "Stop rstudio"
+  service:
+    name: "rstudio-server"
+    state: "stopped"
+
+- name: "Remove yum repos"
+  become: "true"
+  file:
+    path: "{{ rstudio_repo_name }}"
+    state: "absent"
+
+- name: "Remove rstudio"
+  become: "true"
+  yum:
+    name: "{{ rstudio_rpm }}"
+    state: "absent"
+
+- name: "Remove configurations files"
+  become: "true"
+  file:
+    path: "{{ rstudio_path_conf }}"
+    state: "absent"
+
+- name: "Remove FS & LV for Rstudio"
+  include_role:
+    name: "role_manage_fs"
+  become: "true"
+  tags: "delete"
+  vars:
+    state: "delete"
+    role_create_fs_list:
+      - { name: "rstudio",
+          mntp: "/applis/rstudio",
+          fstype: "ext4",
+          size: "1g",
+          device: "ApplisVg" ,
+          owner: "rstudio-server",
+          group: "rstudio-server",
+          mode: '700'
+        }
+

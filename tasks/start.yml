@@ -1,0 +1,8 @@
+---
+
+- name: "Start RSTUDIO Servce"
+  become: "yes"
+  systemd: 
+    state: "started"
+    name: "rstudio-server"
+

@@ -1,0 +1,34 @@
+---
+
+- name: "Install Rstudio"
+  include: "install.yml"
+  when: state in ['role_rstudio_install', 'role_rstudio_whole_install']
+
+- name: "Configure Rstudio"
+  include: "config.yml"
+  when: state in ['role_rstudio_config', 'role_rstudio_whole_install']
+
+- name: "Correction de bugs"
+  include: "correction.yml"
+  when: state in ['role_rstudio_correction', 'role_rstudio_whole_install']
+
+- name: "Remove RSTUDIO"
+  include: "remove.yml"
+  when: state in ['role_rstudio_remove']
+
+- name: "Update  RSTUDIO"
+  include: "update.yml"
+  when: state in ['role_rstudio_update']
+
+- name: "Restart Rstudio"
+  include: "restart.yml"
+  when: state in ['role_rstudio_restart']
+
+- name: "Stop RSTUDIO"
+  include: "stop.yml"
+  when: state in ['role_rstudio_stop']
+
+- name: "Start RSTUDIO"
+  include: "start.yml"
+  when: state in ['role_rstudio_start']
+

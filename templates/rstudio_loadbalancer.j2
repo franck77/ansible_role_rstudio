@@ -1,0 +1,8 @@
+[config]
+balancer = {{balancer_mode}}
+
+[nodes]
+
+{% for nodes in ha_nodes %}
+{{ nodes }}
+{% endfor %}

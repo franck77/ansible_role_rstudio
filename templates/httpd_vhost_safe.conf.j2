@@ -1,0 +1,29 @@
+UseCanonicalName On
+ServerName {{ inventory_hostname }}.haas.socgen
+Listen {{item.port_httpd}}
+
+<VirtualHost *:{{item.port_httpd}}>
+
+        RewriteEngine on
+        RewriteCond %{HTTP:Upgrade} =websocket
+        RewriteRule /(.*) wss://127.0.0.1:{{item.port_app}}/$1 [P,L]
+        RewriteCond %{HTTP:Upgrade} !=websocket
+        RewriteRule /(.*) https://127.0.0.1:{{item.port_app}}/$1 [P,L]
+
+	ProxyPreserveHost On
+	ProxyRequests Off
+	SSLProxyCheckPeerCN off
+        SSLProxyCheckPeerName off
+        SSLProxyCheckPeerExpire off
+
+	ProxyPass / https://127.0.0.1:{{item.port_app}}/
+	ProxyPassReverse / https://127.0.0.1:{{item.port_app}}/
+	SSLProxyEngine On
+	SSLEngine On
+	SSLCertificateFile {{ certificate }}
+	SSLCertificateKeyFile {{certificate_key}}
+
+	Header unset strict-transport-security
+	RequestHeader unset x-forwarded-host
+</VirtualHost>
+

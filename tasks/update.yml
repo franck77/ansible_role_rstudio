@@ -1,0 +1,52 @@
+---
+
+- name: "Check that input variables are well transmitted to update RSTUDIO"
+  assert:
+    that: "{{ item }} is defined"
+  with_items:
+    - server_repo_url
+    - rstudio_repo_name
+    - server_mirror_repo_url
+    - rstudio_rpm
+
+- name: "Add repository rstudio"
+  become: "true"
+  yum_repository:
+    name: "rstudio"
+    description: "Rstudio repo"
+    baseurl: "{{ server_repo_url }}/{{ rstudio_repo_name }}"
+    mirrorlist: "{{ server_mirror_repo_url }}/{{ rstudio_repo_name }}"
+    gpgcheck: "no"
+    enabled: "yes"
+
+- name: "Check if rstudio package is installed"
+  yum:
+    list: "rstudio-server"
+  register: package_rstudio
+
+- debug:
+    var: package_rstudio.results[0]
+
+- name: "Stop rstudio"
+  become: "true"
+  service:
+    name: "rstudio-server"
+    state: "stopped"
+  when: package_rstudio.results[0].version != '{{ role_rstudio_last_version }}'
+
+- name: "Install rstudio"
+  become: "true"
+  yum:
+    name: "{{ rstudio_rpm }}"
+    state: "latest"
+  when: package_rstudio.results[0].version != '{{ role_rstudio_last_version }}'
+
+- name: "Restart rstudio"
+  become: "true"
+  service:
+    name: "rstudio-server"
+    state: "restarted"
+  
+  when: package_rstudio.results[0].version != '{{ role_rstudio_last_version }}'
+
+

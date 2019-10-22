@@ -1,0 +1,55 @@
+---
+
+- name: "Install httpd"
+  yum: 
+        state: "installed" 
+        name: "{{ item }}"
+  with_items:
+  - httpd
+  - mod_ssl 
+  notify:
+    - "Enable httpd"
+    - "Restart httpd"
+
+- name: "Copy safe module config for httpd"
+  copy: 
+        src: "files/httpd/config/modules_safe" 
+        dest: "{{ apache_path_conf }}"
+
+- name: "Configure httpd_module"
+  apache2_module: 
+        state: "present" 
+        name: "{{item}}" 
+  with_items: "{{ apache_packages }}"
+
+- name: "Configure httpd conf"
+  template:
+        src: "templates/httpd.conf.j2" 
+        dest: "{{ apache_path_conf }}/conf/httpd.conf"
+
+- name: "Configure safe httpd vhosts"
+  template: 
+        src: "templates/httpd_vhost_safe.conf.j2" 
+        dest: "{{ apache_path_conf }}/conf.d/{{ item.vhost_name }}.conf"
+  with_items:
+    - "{{ safe_app }}"
+
+- name: "Configure safe xml file"
+  template: 
+        src: "templates/httpd_sngwebag.conf.j2" 
+        dest: "{{ apache_path_conf }}/modules_safe/sngwebag.xml"
+
+- name: "Configure safe conf.module.d"
+  template: 
+        src: "templates/httpd_safe_module.conf.j2" 
+        dest: "{{ apache_path_conf }}/conf.modules.d/00-safe"
+
+- name: "Stop httpd"
+  service: 
+        name: "httpd" 
+        state: "stopped"
+
+- name: "Start httpd"
+  service: 
+        name: "httpd" 
+        state: "started"
