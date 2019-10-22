@@ -6,5 +6,4 @@ balancer_mode: "custom"
 role_rstudio_last_version: "1.1.442"
 
 ### mail list for watchdog rstudio
-mail_list_watchdog: "wandrille.a.domin@socgen.com,marianne.bioy-ext@socgen.com,franck.vieira@socgen.com,philippe.trigo-ext@socgen.com,guy.akroman-ext@socgen.com"
-
+mail_list_watchdog: ""
