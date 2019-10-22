@@ -1,11 +1,8 @@
 ---
 
-ldap_servername: "phadlx198.haas.socgen"
 produits_path: "/produits"
 applis_path: "/applis"
 keytab_directory: "/etc/security/keytabs_user"
-server_repo_url: "http://phadlx198.haas.socgen:80/repos"
-server_mirror_repo_url: "http://phadlx199.haas.socgen:80/repos"
 
 ### LV/FS
 rstudio_lv_name: "rstudio"
@@ -13,8 +10,6 @@ rstudio_lv_size: "1g"
 rstudio_mount_point: "{{ rstudio_applis_path }}"
 
 ### Rstudio
-rstudio_admin: "grstudio_admin"
-rstudio_power: "grstudio_power"
 rstudio_repo_name: "rstudio_pro"
 rstudio_rpm: "rstudio-server.x86_64"
 rstudio_applis_path: "{{ applis_path }}/rstudio"
@@ -33,28 +28,4 @@ watchdog_log_name: "{{ rstudio_scripts_log }}/ds_appliance_watchdog.log"
 watchdog_script_error: "{{ rstudio_scripts_log }}/ds_appliance_watchdog.err"
 rstudio_mail_alerte_file: "mail_alerte"
 config_watchdog_mail_alerte: "{{ rstudio_scripts_cfg }}/{{ rstudio_mail_alerte_file }}"
-
-### NFS
-nfs_client_homeDS: "/data/homeDS/nfs/home"
-nfs_client_lab: "/data/lab/nfs/lab"
-nfs_server_homeDS: "/data/homeDS/nfs/share"
-nfs_server_lab: "/data/lab/nfs/share"
-nfs_export_options: "(rw,no_root_squash,sync,no_subtree_check)"
-
-### SUDOERS
-rstudio_sudo:
-
-  - socle_sudo_comment: "RSTUDIO"
-    socle_sudo_template_file_name: "00_sudo_template.j2"
-    socle_sudo_dest_file_name: "03_rstudio"
-    socle_sudo_remove_this_config: false
-    socle_sudo_defaults: ""
-    socle_sudo_user_alias: "HAD_RSTUDIO"
-    socle_sudo_users: "rstudio-server"
-    socle_sudo_usernames: "user rstudio"
-    socle_sudo_servers_alias: "HOSTS_HAD_RSTUDIO"
-    socle_sudo_servers_inventory_group: "DS"
-    socle_sudo_su_users: "ALL"
-    socle_sudo_nopassword: true
-    socle_sudo_command: "/usr/bin/systemctl stop rstudio-server.service,/usr/bin/systemctl start rstudio-server.service,/usr/bin/systemctl restart rstudio-server.service,/usr/bin/systemctl status rstudio-server.service,/sbin/rstudio-server *"
 
