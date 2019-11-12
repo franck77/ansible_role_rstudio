@@ -60,13 +60,6 @@ role_create_fs_list:
       mode: '700'
      }
 
-### LDAP
-ldap_servername: "phadlx198.haas.socgen"
-
-### REPOS
-server_repo_url: "http://phadlx198.haas.socgen:80/repos"
-server_mirror_repo_url: "http://phadlx199.haas.socgen:80/repos"
-
 ### JAVA
 java_path_server: "/usr/java/jdk1.8.0_121/jre/lib/amd64/server"
 r_java_home: "/usr/java/jdk1.8.0_121/jre/"
